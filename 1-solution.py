@@ -1,4 +1,4 @@
-changes = [int(line) for line in open("1-input")]
+changes = [int(line) for line in open("1-input.txt")]
 
 # Part 1
 print(sum(changes))
