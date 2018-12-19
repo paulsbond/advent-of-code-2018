@@ -24,24 +24,34 @@ def print_grid(positions):
   for i in range(len(grid)):
     print("".join(grid[i]))
 
-def get_area(positions):
+def area(points, seconds):
+  positions = [point.position_after(seconds) for point in points]
   min_x = min(position[0] for position in positions)
   max_x = max(position[0] for position in positions)
   min_y = min(position[1] for position in positions)
   max_y = max(position[1] for position in positions)
   return (max_x - min_x) * (max_y - min_y)
 
-points = [Point(line) for line in open("10-test.txt")]
-positions = [point.position for point in points]
-min_area = get_area(positions)
-min_area_seconds = 0
+def seconds_between_points(point1, point2):
+  x2 = (point1.position[0] - point2.position[0]) ** 2
+  y2 = (point1.position[1] - point2.position[1]) ** 2
+  distance = (x2 + y2) ** 0.5
+  speed1 = (point1.velocity[0] ** 2 + point1.velocity[1] ** 2) ** 0.5
+  speed2 = (point2.velocity[0] ** 2 + point2.velocity[1] ** 2) ** 0.5
+  return distance / (speed1 + speed2)
 
-for seconds in range(1, 5):
-  positions = [point.position_after(seconds) for point in points]
-  area = get_area(positions)
-  if area < min_area:
-    min_area = area
-    min_area_seconds = seconds
+def estimate_seconds(points):
+  left = min(points, key=lambda point: point.position[0])
+  right = max(points, key=lambda point: point.position[0])
+  seconds1 = seconds_between_points(left, right)
+  top = min(points, key=lambda point: point.position[1])
+  bottom = max(points, key=lambda point: point.position[1])
+  seconds2 = seconds_between_points(top, bottom)
+  return int((seconds1 + seconds2) / 2)
 
-positions = [point.position_after(min_area_seconds) for point in points]
+points = [Point(line) for line in open("10-input.txt")]
+estimate = estimate_seconds(points)
+test_range = range(estimate - 20, estimate + 20)
+seconds = min(test_range, key=lambda s: area(points, s))
+positions = [point.position_after(seconds) for point in points]
 print_grid(positions)
